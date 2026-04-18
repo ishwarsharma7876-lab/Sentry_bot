@@ -5,47 +5,52 @@ from discord.ext import commands
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.bot.remove_command("help")  # Remove default help to avoid conflict
 
     @commands.command(name="help")
-    async def help_command(self, ctx):
-        embed = discord.Embed(
-            title="✦ VOID SPACE BOT HELP ✦",
-            description="Here are all available commands:",
-            color=0x71368A
-        )
+    async def help_command(self, ctx, command_name: str = None):
+        if command_name is None:
+            # Show all commands grouped nicely
+            embed = discord.Embed(
+                title="🔰 VOID SPACE Bot Help",
+                description="Here are all available commands:",
+                color=0x71368A
+            )
 
-        # Group commands by cog
-        for cog_name, cog in self.bot.cogs.items():
-            commands_list = []
-            
-            for command in cog.get_commands():
-                # Skip hidden commands if any
-                if command.hidden:
-                    continue
-                    
-                desc = command.help or "No description available."
-                commands_list.append(f"`+{command.name}` — {desc}")
+            embed.add_field(
+                name="🎟️ Tickets",
+                value="`+ticketpanel` — Show ticket creation panel\n`+close` — Close current ticket",
+                inline=False
+            )
 
-            if commands_list:
-                cog_title = cog_name.replace("Cog", "").replace("Commands", "").strip()
-                embed.add_field(
-                    name=f"**{cog_title}**",
-                    value="\n".join(commands_list),
-                    inline=False
+            embed.add_field(
+                name="💳 Payments",
+                value="`+payment` — Show payment methods\n`+paymentedit` — Edit payment methods",
+                inline=False
+            )
+
+            embed.add_field(
+                name="👋 Welcome & Others",
+                value="`+react <emoji>` — React to a message (reply to it)",
+                inline=False
+            )
+
+            embed.set_footer(text="Use +help <command> for more details | VOID SPACE")
+            await ctx.send(embed=embed)
+
+        else:
+            # Specific command help
+            cmd = self.bot.get_command(command_name.lower())
+            if cmd:
+                embed = discord.Embed(
+                    title=f"Command: +{cmd.name}",
+                    description=cmd.help or "No description available.",
+                    color=0x71368A
                 )
-
-        embed.set_footer(text=f"Total commands: {len(self.bot.commands)} | Prefix: +")
-        
-        await ctx.send(embed=embed)
-
-    # Optional: Add descriptions to your other commands for better help
-    # Example in tickets.py:
-    # @commands.command(name="ticketpanel", help="Send the ticket creation panel")
-    # @commands.command(name="setticketcategory", help="Set the category for new tickets")
-
-    # Same for welcome:
-    # @commands.command(name="setupwelcome", help="Setup custom welcome message")
-
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send(f"❌ Command `+{command_name}` not found.")
 
 async def setup(bot):
     await bot.add_cog(Help(bot))
+    print("Help command loaded")
