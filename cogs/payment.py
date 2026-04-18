@@ -57,31 +57,31 @@ class PaymentSelectView(View):
             embed=embed
         )
 
-    @discord.ui.button(label="UPI", emoji="💳")
+    @discord.ui.button(label="UPI", emoji="<:upi:1493301499181138162>")
     async def upi(self, i, b):
         await self.send_payment(i, "upi")
 
-    @discord.ui.button(label="Wise", emoji="💰")
+    @discord.ui.button(label="Wise", emoji="<:wise:1493539277563498598>")
     async def wise(self, i, b):
         await self.send_payment(i, "wise")
 
-    @discord.ui.button(label="PayPal", emoji="💳")
+    @discord.ui.button(label="PayPal", emoji="<:paypal:1493300900289052726>")
     async def paypal(self, i, b):
         await self.send_payment(i, "paypal")
 
-    @discord.ui.button(label="Venmo", emoji="💵")
+    @discord.ui.button(label="Venmo", emoji="<:venmo:1493301369933795368>")
     async def venmo(self, i, b):
         await self.send_payment(i, "venmo")
 
-    @discord.ui.button(label="Cash App", emoji="💸")
+    @discord.ui.button(label="Cash App", emoji="<:cashapp:1493301256830189729>")
     async def cashapp(self, i, b):
         await self.send_payment(i, "cashapp")
 
-    @discord.ui.button(label="Zelle", emoji="🏦")
+    @discord.ui.button(label="Zelle", emoji="<:zelle:1493302248434958459>")
     async def zelle(self, i, b):
         await self.send_payment(i, "zelle")
 
-    @discord.ui.button(label="Crypto", emoji="🪙")
+    @discord.ui.button(label="Crypto", emoji="<:crypto:1493300772912369736>")
     async def crypto(self, i, b):
         await self.send_payment(i, "crypto")
 
