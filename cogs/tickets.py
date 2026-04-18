@@ -5,7 +5,7 @@ from discord import SelectOption, Interaction
 import json
 import os
 
-CONFIG_PATH = "data/ticket_config.json"
+CONFIG_PATH = "/app/data/ticket_config.json"
 TRANSCRIPT_CHANNEL_ID = 1461842853209833655
 
 def load_ticket_config():
