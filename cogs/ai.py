@@ -1,16 +1,14 @@
 import discord
 from discord.ext import commands
-import google.generativeai as genai
+from google import genai
 import os
 
 class AI(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-        # ✅ NEW WORKING MODEL
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        # ✅ NEW CLIENT (correct way)
+        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -28,7 +26,10 @@ class AI(commands.Cog):
                     return await message.reply("👀 Say something!")
 
                 async with message.channel.typing():
-                    response = self.model.generate_content(prompt)
+                    response = self.client.models.generate_content(
+                        model="gemini-1.5-flash",
+                        contents=prompt
+                    )
 
                 reply = response.text[:2000]
                 await message.reply(reply)
