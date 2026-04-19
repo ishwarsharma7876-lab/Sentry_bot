@@ -1,9 +1,9 @@
-from groq import Groq
 import discord
 from discord.ext import commands
+from groq import Groq
 import os
 
-class AI(commands.Cog):
+class AIChat(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -13,43 +13,49 @@ class AI(commands.Cog):
         if message.author.bot:
             return
 
+        # 🔥 VERY IMPORTANT → DO NOT TOUCH COMMANDS
         if message.content.startswith("+"):
             return
 
-        if self.bot.user.mentioned_in(message):
-            try:
-                prompt = message.content.replace(f"<@{self.bot.user.id}>", "").strip()
+        # Only respond when mentioned
+        if not self.bot.user.mentioned_in(message):
+            return
 
-                if not prompt:
-                    return await message.reply("Hey... say something 😊")
+        try:
+            # Remove bot mention
+            prompt = message.content.replace(f"<@{self.bot.user.id}>", "").strip()
 
-                async with message.channel.typing():
-                    chat = self.client.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": (
-                                    "You are a warm, friendly, emotionally intelligent AI. "
-                                    "Talk like a close friend. Be supportive, slightly playful, "
-                                    "and natural. Use simple language. Sometimes use emojis 😊. "
-                                    "Don't sound robotic or like a teacher. Keep replies engaging."
-                                )
-                            },
-                            {
-                                "role": "user",
-                                "content": prompt
-                            }
-                        ],
-                        temperature=0.9  # 🔥 makes it more human-like
-                    )
+            if not prompt:
+                return await message.reply("Yeah? 😄")
 
-                reply = chat.choices[0].message.content[:2000]
-                await message.reply(reply)
+            async with message.channel.typing():
+                response = self.client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a friendly and smart assistant. "
+                                "Talk like a natural human. "
+                                "Keep answers clear, helpful, and slightly casual. "
+                                "Do NOT act like a bot. Keep it engaging."
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    temperature=0.8
+                )
 
-            except Exception as e:
-                print("ERROR:", e)
-                await message.reply("Hmm... something went wrong 😔")
+            reply = response.choices[0].message.content[:2000]
+
+            await message.reply(reply)
+
+        except Exception as e:
+            print("AI ERROR:", e)
+            await message.reply("Hmm… something went wrong 😔")
 
 async def setup(bot):
-    await bot.add_cog(AI(bot))
+    await bot.add_cog(AIChat(bot))
