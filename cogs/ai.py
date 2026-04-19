@@ -1,14 +1,12 @@
 import discord
 from discord.ext import commands
-from google import genai
+from groq import Groq
 import os
 
 class AI(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-        # ✅ NEW CLIENT (correct way)
-        self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -26,16 +24,18 @@ class AI(commands.Cog):
                     return await message.reply("👀 Say something!")
 
                 async with message.channel.typing():
-                    response = self.client.models.generate_content(
-                        model="gemini-1.5-flash",
-                        contents=prompt
+                    chat = self.client.chat.completions.create(
+                        messages=[
+                            {"role": "user", "content": prompt}
+                        ],
+                        model="llama3-8b-8192"
                     )
 
-                reply = response.text[:2000]
+                reply = chat.choices[0].message.content[:2000]
                 await message.reply(reply)
 
             except Exception as e:
-                print("FULL ERROR:", e)
+                print("ERROR:", e)
                 await message.reply(f"❌ Error: {e}")
 
 async def setup(bot):
