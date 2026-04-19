@@ -8,7 +8,7 @@ intents.message_content = True
 intents.members = True
 intents.guilds = True
 
-bot = commands.Bot(command_prefix="+", intents=intents)
+bot = commands.Bot(command_prefix="+", "sentry ", "Sentry ", intents=intents)
 
 # 🔥 Prevent multiple on_ready runs
 bot.ready = False
