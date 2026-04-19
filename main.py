@@ -1,4 +1,3 @@
-# main.py
 import discord
 from discord.ext import commands
 import os
@@ -11,30 +10,40 @@ intents.guilds = True
 
 bot = commands.Bot(command_prefix="+", intents=intents)
 
+# 🔥 Prevent multiple on_ready runs
+bot.ready = False
+
+
+# ====================== READY EVENT ======================
 @bot.event
 async def on_ready():
+    if bot.ready:
+        return  # 🚫 prevents duplicate execution
+
+    bot.ready = True
+
     print(f"Logged in as {bot.user}")
 
-    # Register persistent views (very important for tickets, payment editor, close buttons, etc.)
+    # ====================== REGISTER VIEWS ======================
     try:
         from cogs.tickets import PersistentTicketView, CloseTicketView
         bot.add_view(PersistentTicketView())
         bot.add_view(CloseTicketView())
-        print("✅ Ticket views registered successfully")
+        print("✅ Ticket views registered")
     except Exception as e:
-        print(f"❌ Ticket view registration failed: {e}")
+        print(f"❌ Ticket view error: {e}")
 
     try:
         from cogs.payment import PaymentSelectView
         bot.add_view(PaymentSelectView(bot))
         print("✅ Payment view registered")
     except Exception as e:
-        print(f"❌ Payment view registration failed: {e}")
+        print(f"❌ Payment view error: {e}")
 
-    print("Bot is ready!\n")
+    print("✅ Bot is fully ready!\n")
 
 
-# ====================== AUTO LOAD ALL COGS ======================
+# ====================== AUTO LOAD COGS ======================
 async def load_cogs():
     if not os.path.exists("cogs"):
         print("❌ 'cogs' folder not found!")
@@ -42,17 +51,18 @@ async def load_cogs():
 
     for filename in os.listdir("cogs"):
         if filename.endswith(".py"):
-            cog_name = f"cogs.{filename[:-3]}"
+            cog = f"cogs.{filename[:-3]}"
             try:
-                await bot.load_extension(cog_name)
-                print(f"Loaded → {cog_name}")
+                await bot.load_extension(cog)
+                print(f"✅ Loaded → {cog}")
             except Exception as e:
-                print(f"Failed to load {cog_name}: {e}")
+                print(f"❌ Failed → {cog}: {e}")
 
 
+# ====================== MAIN START ======================
 async def main():
     async with bot:
-        await load_cogs()
+        await load_cogs()  # 🔥 auto loads everything
         await bot.start(os.getenv("BOT_TOKEN"))
 
 
