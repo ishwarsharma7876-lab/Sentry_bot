@@ -21,12 +21,23 @@ class AI(commands.Cog):
                 prompt = message.content.replace(f"<@{self.bot.user.id}>", "").strip()
 
                 if not prompt:
-                    return await message.reply("👀 Say something!")
+                    return await message.reply("Hey... say something 😊")
 
                 async with message.channel.typing():
                     chat = self.client.chat.completions.create(
-                        messages=[{"role": "user", "content": prompt}],
-                        model="llama-3.3-70b-versatile"  # ✅ FIXED MODEL
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": (
+                                    "You are a friendly, emotional, and caring AI. "
+                                    "Talk like a close friend. Be warm, supportive, "
+                                    "a little playful, and natural. Avoid being robotic. "
+                                    "Keep responses human-like and engaging."
+                                )
+                            },
+                            {"role": "user", "content": prompt}
+                        ],
+                        model="llama-3.3-70b-versatile"
                     )
 
                 reply = chat.choices[0].message.content[:2000]
@@ -34,7 +45,7 @@ class AI(commands.Cog):
 
             except Exception as e:
                 print("ERROR:", e)
-                await message.reply(f"❌ Error: {e}")
+                await message.reply("Hmm... something went wrong 😔")
 
 async def setup(bot):
     await bot.add_cog(AI(bot))
