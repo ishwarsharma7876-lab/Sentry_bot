@@ -1,6 +1,6 @@
+from groq import Groq
 import discord
 from discord.ext import commands
-from groq import Groq
 import os
 
 class AI(commands.Cog):
@@ -25,10 +25,8 @@ class AI(commands.Cog):
 
                 async with message.channel.typing():
                     chat = self.client.chat.completions.create(
-                        messages=[
-                            {"role": "user", "content": prompt}
-                        ],
-                        model="llama3-8b-8192"
+                        messages=[{"role": "user", "content": prompt}],
+                        model="mixtral-8x7b-32768"  # ✅ FIXED MODEL
                     )
 
                 reply = chat.choices[0].message.content[:2000]
