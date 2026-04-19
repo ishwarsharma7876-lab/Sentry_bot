@@ -26,7 +26,7 @@ class AI(commands.Cog):
                 async with message.channel.typing():
                     chat = self.client.chat.completions.create(
                         messages=[{"role": "user", "content": prompt}],
-                        model="mixtral-8x7b-32768"  # ✅ FIXED MODEL
+                        model="llama-3.3-70b-versatile"  # ✅ FIXED MODEL
                     )
 
                 reply = chat.choices[0].message.content[:2000]
