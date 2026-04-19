@@ -1,49 +1,53 @@
+# main.py
 import discord
 from discord.ext import commands
 import os
 import asyncio
+
+# Multiple prefixes support: +, sentry, Sentry, SENTRY
+def get_prefix(bot, message):
+    if not message.content:
+        return "+"
+    
+    content = message.content.lower()
+    
+    # Check for sentry prefixes (with or without space)
+    if content.startswith(("sentry ", "sentry")):
+        return ["sentry ", "Sentry ", "SENTRY ", "+"]
+    
+    return commands.when_mentioned_or("+", "sentry ", "Sentry ", "SENTRY ")(bot, message)
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.guilds = True
 
-bot = commands.Bot(command_prefix="+", "sentry ", "Sentry ", intents=intents)
+bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
-# 🔥 Prevent multiple on_ready runs
-bot.ready = False
-
-
-# ====================== READY EVENT ======================
 @bot.event
 async def on_ready():
-    if bot.ready:
-        return  # 🚫 prevents duplicate execution
-
-    bot.ready = True
-
     print(f"Logged in as {bot.user}")
 
-    # ====================== REGISTER VIEWS ======================
+    # Register persistent views
     try:
         from cogs.tickets import PersistentTicketView, CloseTicketView
         bot.add_view(PersistentTicketView())
         bot.add_view(CloseTicketView())
-        print("✅ Ticket views registered")
+        print("✅ Ticket views registered successfully")
     except Exception as e:
-        print(f"❌ Ticket view error: {e}")
+        print(f"❌ Ticket view registration failed: {e}")
 
     try:
         from cogs.payment import PaymentSelectView
         bot.add_view(PaymentSelectView(bot))
         print("✅ Payment view registered")
     except Exception as e:
-        print(f"❌ Payment view error: {e}")
+        print(f"❌ Payment view registration failed: {e}")
 
-    print("✅ Bot is fully ready!\n")
+    print("Bot is ready!\n")
 
 
-# ====================== AUTO LOAD COGS ======================
+# Auto load all cogs
 async def load_cogs():
     if not os.path.exists("cogs"):
         print("❌ 'cogs' folder not found!")
@@ -51,18 +55,17 @@ async def load_cogs():
 
     for filename in os.listdir("cogs"):
         if filename.endswith(".py"):
-            cog = f"cogs.{filename[:-3]}"
+            cog_name = f"cogs.{filename[:-3]}"
             try:
-                await bot.load_extension(cog)
-                print(f"✅ Loaded → {cog}")
+                await bot.load_extension(cog_name)
+                print(f"Loaded → {cog_name}")
             except Exception as e:
-                print(f"❌ Failed → {cog}: {e}")
+                print(f"Failed to load {cog_name}: {e}")
 
 
-# ====================== MAIN START ======================
 async def main():
     async with bot:
-        await load_cogs()  # 🔥 auto loads everything
+        await load_cogs()
         await bot.start(os.getenv("BOT_TOKEN"))
 
 
