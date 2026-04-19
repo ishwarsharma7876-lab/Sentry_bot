@@ -21,31 +21,58 @@ class AI(commands.Cog):
                 prompt = message.content.replace(f"<@{self.bot.user.id}>", "").strip()
 
                 if not prompt:
-                    return await message.reply("Hey... say something 😊")
+                    return await message.reply("Say something 😄")
 
-                async with message.channel.typing():
-                    chat = self.client.chat.completions.create(
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": (
-                                    "You are a friendly, emotional, and caring AI. "
-                                    "Talk like a close friend. Be warm, supportive, "
-                                    "a little playful, and natural. Avoid being robotic. "
-                                    "Keep responses human-like and engaging."
-                                )
-                            },
-                            {"role": "user", "content": prompt}
-                        ],
-                        model="llama-3.3-70b-versatile"
-                    )
+                # 🔥 GET ALL COMMANDS AUTOMATICALLY
+                command_names = [cmd.name for cmd in self.bot.commands]
+
+                # 🔥 AI CHOOSES COMMAND
+                intent = self.client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                f"You are a command classifier.\n"
+                                f"Available commands: {', '.join(command_names)}\n\n"
+                                f"Return ONLY the exact command name from the list.\n"
+                                f"If none match, return: chat"
+                            )
+                        },
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+
+                result = intent.choices[0].message.content.strip().lower()
+
+                # 🔥 AUTO EXECUTE COMMAND
+                if result != "chat":
+                    command = self.bot.get_command(result)
+                    if command:
+                        ctx = await self.bot.get_context(message)
+                        return await ctx.invoke(command)
+
+                # 🔥 NORMAL CHAT
+                chat = self.client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a friendly, emotional AI. Talk like a close friend."
+                            )
+                        },
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.9
+                )
 
                 reply = chat.choices[0].message.content[:2000]
                 await message.reply(reply)
 
             except Exception as e:
                 print("ERROR:", e)
-                await message.reply("Hmm... something went wrong 😔")
+                await message.reply("Something went wrong 😔")
 
 async def setup(bot):
     await bot.add_cog(AI(bot))
