@@ -8,6 +8,7 @@ import os
 CONFIG_PATH = "/app/data/ticket_config.json"
 TRANSCRIPT_CHANNEL_ID = 1461842853209833655
 
+
 def load_ticket_config():
     if os.path.exists(CONFIG_PATH):
         with open(CONFIG_PATH, "r") as f:
@@ -64,7 +65,6 @@ class PersistentTicketView(View):
             guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True, manage_channels=True),
         }
 
-        # ✅ FIXED topic (stores user ID)
         topic = f"Ticket: {value.replace('_',' ').title()} | UserID:{user.id}"
 
         if category_id:
@@ -76,15 +76,26 @@ class PersistentTicketView(View):
         else:
             channel = await guild.create_text_channel(name=ticket_name, topic=topic, overwrites=overwrites)
 
+        # ✅ UPDATED MESSAGE (ONLY CHANGE)
         embed = discord.Embed(
-            title=f"✦ VOID SUPPORT TERMINAL ✦ – {value.replace('_', ' ').title()}",
-            description=f"{user.mention}, thank you for opening a ticket!\n\n**Please describe your issue in detail.**\nA staff member will assist you shortly.",
+            title="#VOID Support Terminal",
+            description=(
+                "Meanwhile tell us what you’re here for:\n"
+                "• Account Purchase\n"
+                "• Gold or Event Pass Purchase\n"
+                "• COC Services (farming, raids, bases, etc.)\n"
+                "• Raffle Tickets\n\n"
+                "The VOID Team will be with you shortly."
+            ),
             color=0x71368A
         )
         embed.set_footer(text="VOID SPACE • Official Ticket System")
         embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
 
-        await channel.send(embed=embed, content=user.mention)
+        await channel.send(
+            content=f"Hey {user.mention}!  You've entered a safe space!  Kindly wait, <@223110396871966728> / <@645693323104878623> will assist you soon!",
+            embed=embed
+        )
 
         close_view = CloseTicketView()
         await channel.send("**Click below to close this ticket**", view=close_view)
