@@ -78,7 +78,7 @@ class PersistentTicketView(View):
 
         # ✅ UPDATED MESSAGE (ONLY CHANGE)
         embed = discord.Embed(
-            title="#VOID Support Terminal",
+            title="VOID Support Terminal",
             description=(
                 "Meanwhile tell us what you’re here for:\n"
                 "• Account Purchase\n"
