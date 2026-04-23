@@ -12,7 +12,7 @@ class Emotions(commands.Cog):
 
     kiss_messages = [
         "{author} kissed {target} deeply and passionately 💋",
-        "{author} gave {target} a soft and loving kiss\~",
+        "{author} gave {target} a soft and loving kiss",
         "{author} pulled {target} close and kissed them intensely ❤️",
         "{author} sneaked a cute kiss on {target}'s lips 😘",
         "{author} kissed {target} so deeply the world stopped for a moment 💕",
@@ -45,7 +45,7 @@ class Emotions(commands.Cog):
     ]
 
     touch_messages = [
-        "{author} gently ran their fingers over {target}'s body\~",
+        "{author} gently ran their fingers over {target}'s body",
         "{author} touched {target} teasingly 😏",
         "{author} slowly caressed {target}'s skin 🔥",
         "{author} gave {target} a sensual touch",
