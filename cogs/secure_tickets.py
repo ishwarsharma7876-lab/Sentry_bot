@@ -1,37 +1,60 @@
 import discord
 from discord.ext import commands
-from discord.ui import View, Button
-from discord import Interaction
+from discord.ui import View, Select, Button
+from discord import SelectOption, Interaction
+
+CATEGORY_ID = 1461296075376689279
 
 # ================================
-# OPEN BUTTON VIEW
+# PANEL VIEW (DROPDOWN)
 # ================================
 class SecurePanelView(View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Open Ticket", style=discord.ButtonStyle.blurple, emoji="🔐", custom_id="secure_open_ticket_v1")
-    async def open_ticket(self, interaction: Interaction, button: Button):
+        options = [
+            SelectOption(label="Report a Scam", value="scam", emoji="<:scam:1496923057384587275>"),
+            SelectOption(label="General Support", value="support", emoji="<:support:1496922968989892668>"),
+            SelectOption(label="VOID Authorized MM", value="mm", emoji="<:voidspace:1461678340883873852>")
+        ]
+
+        select = Select(
+            placeholder="Select ticket reason",
+            options=options,
+            custom_id="secure_ticket_select_v2"
+        )
+
+        select.callback = self.create_ticket
+        self.add_item(select)
+
+    async def create_ticket(self, interaction: Interaction):
         guild = interaction.guild
         user = interaction.user
+        reason = interaction.data["values"][0]
 
-        ticket_name = f"secure-{user.name}".lower()
+        category = guild.get_channel(CATEGORY_ID)
 
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
-            user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True),
+            user: discord.PermissionOverwrite(view_channel=True, send_messages=True),
             guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True, manage_channels=True),
         }
 
-        channel = await guild.create_text_channel(name=ticket_name, overwrites=overwrites)
+        channel = await category.create_text_channel(
+            name=f"ticket-{user.name}".lower(),
+            overwrites=overwrites,
+            topic=f"UserID:{user.id} | Reason:{reason}"
+        )
 
         # ================================
-        # YOUR CUSTOM EMBED
+        # GREET EMBED
         # ================================
         embed = discord.Embed(
             title="VOID SUPPORT — TICKET OPENED",
             description=(
-                "Your request has been successfully registered.\n\n"
+                f"{user.mention}, thank you for opening a ticket!\n\n"
+                "**Please describe your issue in detail.**\n"
+                "A staff member will assist you shortly.\n\n"
                 "Please clearly provide:\n\n"
                 "• <:Builder:1488534056554598452>  `Buyer & Seller usernames`\n"
                 "• <:coc:1462053918740844709>  `(Acc/Clan) trade`\n"
@@ -44,21 +67,13 @@ class SecurePanelView(View):
                 "• No payments before MM verification\n"
                 "• Failure to follow results in loss of protection"
             ),
-            color=0xFF4FD8
+            color=6c3baa
         )
 
+        embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
         embed.set_footer(text="VOID SPACE • Secure System")
 
-        # ================================
-        # CLOSE BUTTON
-        # ================================
-        close_view = CloseTicketView()
-
-        await channel.send(
-            content=f"{user.mention} <@&1461344309193347092>",
-            embed=embed,
-            view=close_view
-        )
+        await channel.send(embed=embed, view=CloseButtonView())
 
         await interaction.response.send_message(
             f"✅ Ticket created → {channel.mention}",
@@ -66,16 +81,34 @@ class SecurePanelView(View):
         )
 
 # ================================
-# CLOSE BUTTON VIEW
+# CLOSE BUTTON
 # ================================
-class CloseTicketView(View):
+class CloseButtonView(View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, emoji="🔒", custom_id="secure_close_ticket_v1")
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, emoji="🔒", custom_id="secure_close_ticket_btn")
     async def close_ticket(self, interaction: Interaction, button: Button):
+        await interaction.response.send_message(
+            "Are you sure you want to close this ticket?",
+            view=ConfirmCloseView()
+        )
+
+# ================================
+# CONFIRM CLOSE VIEW
+# ================================
+class ConfirmCloseView(View):
+    def __init__(self):
+        super().__init__(timeout=60)
+
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.red)
+    async def yes(self, interaction: Interaction, button: Button):
         await interaction.response.defer()
         await interaction.channel.delete(reason=f"Closed by {interaction.user}")
+
+    @discord.ui.button(label="No", style=discord.ButtonStyle.green)
+    async def no(self, interaction: Interaction, button: Button):
+        await interaction.response.send_message("Cancelled.", ephemeral=True)
 
 # ================================
 # COG
@@ -93,12 +126,26 @@ class SecureTickets(commands.Cog):
                 "• Follow instructions after ticket creation\n"
                 "• All secure trades must begin here."
             ),
-            color=0xFF4FD8
+            color=6c3baa
         )
 
+        embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
         embed.set_footer(text="VOID SPACE • Secure System")
 
         await ctx.send(embed=embed, view=SecurePanelView())
+
+    # ================================
+    # +cl COMMAND
+    # ================================
+    @commands.command()
+    async def cl(self, ctx):
+        if "ticket-" not in ctx.channel.name:
+            return await ctx.send("❌ Use this inside a ticket.")
+
+        await ctx.send(
+            "Are you sure you want to close this ticket?",
+            view=ConfirmCloseView()
+        )
 
 # ================================
 # SETUP
