@@ -29,7 +29,7 @@ except Exception as e:
     print(f"❌ Old ticket view error: {e}")
 
 try:
-    from cogs.secureticket import SecurePanelView, CloseTicketView as SecureCloseView
+    from cogs.secure_tickets import SecurePanelView, CloseTicketView as SecureCloseView
     bot.add_view(SecurePanelView())
     bot.add_view(SecureCloseView())
     print("✅ Secure ticket views registered")
