@@ -31,6 +31,9 @@ async def on_ready():
     # Register persistent views
     try:
         from cogs.tickets import PersistentTicketView, CloseTicketView
+        from cogs.secure_tickets import SecurePanelView, CloseTicketView
+        bot.add_view(SecurePanelView())
+        bot.add_view(CloseTicketView())
         bot.add_view(PersistentTicketView())
         bot.add_view(CloseTicketView())
         print("✅ Ticket views registered successfully")
