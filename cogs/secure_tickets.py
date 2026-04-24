@@ -14,9 +14,9 @@ class TicketSelect(Select):
         self.cog = cog
 
         options = [
-            SelectOption(label="Report a Scam", value="scam", emoji="<:scam:1496923057384587275>"),
+            SelectOption(label="VOID Authorized MM", value="mm", emoji="<:voidspace:1461678340883873852>"),
             SelectOption(label="General Support", value="support", emoji="<:support:1496922968989892668>"),
-            SelectOption(label="VOID Authorized MM", value="mm", emoji="<:voidspace:1461678340883873852>")
+            SelectOption(label="Report a Scam", value="scam", emoji="<:scam:1496923057384587275>")
         ]
 
         super().__init__(
