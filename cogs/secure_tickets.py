@@ -5,7 +5,6 @@ from discord import SelectOption, Interaction
 
 CATEGORY_ID = 1461296075376689279
 
-
 # ================================
 # SELECT MENU
 # ================================
@@ -85,7 +84,7 @@ class SecureTickets(commands.Cog):
         self.bot = bot
 
     # ================================
-    # CREATE TICKET LOGIC
+    # CREATE TICKET
     # ================================
     async def create_ticket(self, interaction: Interaction):
         try:
@@ -114,7 +113,7 @@ class SecureTickets(commands.Cog):
             )
 
             # ================================
-            # SCAM + SUPPORT (SIMPLE EMBED)
+            # SCAM + SUPPORT
             # ================================
             if reason in ["scam", "support"]:
 
@@ -126,12 +125,11 @@ class SecureTickets(commands.Cog):
                         "**Please describe your issue in detail.**\n"
                         "A staff member will assist you shortly."
                     ),
-                    embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg?ex=69ec45c6&is=69eaf446&hm=49dae0c8c575e7d0669c4cd1339158343990e80e347bf9b7719bc17d109a8d98"),
                     color=0x8A2BE2
                 )
 
             # ================================
-            # MM TICKETS (FULL FORMAT)
+            # MM TICKETS
             # ================================
             else:
 
@@ -141,10 +139,8 @@ class SecureTickets(commands.Cog):
                     title="VOID SUPPORT — MM REQUEST",
                     description=(
                         f"{user.mention}, thank you for opening a ticket!\n\n"
-                        "**Please wait for a VOID MM to respond.**\n"
                         "A staff member will assist you shortly."
                     ),
-                    embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg?ex=69ec45c6&is=69eaf446&hm=49dae0c8c575e7d0669c4cd1339158343990e80e347bf9b7719bc17d109a8d98"),
                     color=0x8A2BE2
                 )
 
@@ -152,6 +148,12 @@ class SecureTickets(commands.Cog):
             # SEND MESSAGES
             # ================================
             await channel.send(outside_text)
+
+            # 💜 YOUR UPDATED IMAGE ADDED HERE
+            inside_embed.set_image(
+                url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg"
+            )
+
             await channel.send(embed=inside_embed, view=CloseButtonView())
 
             await interaction.response.send_message(
@@ -181,7 +183,10 @@ class SecureTickets(commands.Cog):
             color=0x8A2BE2
         )
 
-        embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
+        embed.set_image(
+            url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg"
+        )
+
         embed.set_footer(text="VOID SPACE • Secure System")
 
         await ctx.send(embed=embed, view=SecurePanelView(self))
