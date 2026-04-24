@@ -35,7 +35,14 @@ try:
     print("✅ Secure ticket views registered")
 except Exception as e:
     print(f"❌ Secure ticket view error: {e}")
-
+    
+try:
+    from cogs.secure_tickets import SecurePanelView, CloseButtonView
+    bot.add_view(SecurePanelView())
+    bot.add_view(CloseButtonView())
+    print("loaded successfully")
+else:
+    print(f"not loaded: {e}")
 # ======================
 # ON READY
 # ======================
