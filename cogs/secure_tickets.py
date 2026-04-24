@@ -154,6 +154,7 @@ class SecureTickets(commands.Cog):
                     ),
                     color=0x8A2BE2
                 )
+                inside_embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
 
             else:
                 outside_text = f"{user.mention}"
