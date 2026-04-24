@@ -5,6 +5,7 @@ from discord import SelectOption, Interaction
 
 CATEGORY_ID = 1461296075376689279
 
+
 # ================================
 # SELECT MENU
 # ================================
@@ -117,7 +118,7 @@ class SecureTickets(commands.Cog):
             # ================================
             if reason in ["scam", "support"]:
 
-                outside_text = f"{user.mention}"
+                outside_text = f"{user.mention}, thank you for opening a ticket!"
 
                 inside_embed = discord.Embed(
                     description=(
@@ -129,18 +130,35 @@ class SecureTickets(commands.Cog):
                 )
 
             # ================================
-            # MM TICKETS
+            # MM TICKET (FULL TEMPLATE)
             # ================================
-            else:
+            elif reason == "mm":
 
                 outside_text = f"{user.mention}, thank you for opening a ticket!"
 
                 inside_embed = discord.Embed(
-                    title="VOID SUPPORT — MM REQUEST",
                     description=(
                         f"{user.mention}, thank you for opening a ticket!\n\n"
-                        "A staff member will assist you shortly."
+                        "Please clearly provide:\n\n"
+                        "• <:Builder:1488534056554598452>  `Buyer & Seller usernames`\n"
+                        "• <:coc:1462053918740844709>  `(Acc/Clan) trade`\n"
+                        "• <:cashapp:1493301256830189729>  `Agreed price (exact amount)`\n"
+                        "• 💳  `Payment method`\n"
+                        "• 📎  `Screenshots/images of the deal`\n\n"
+                        "<a:arrowp:1462066642778329171> NEXT STEP\n\n"
+                        "• A VOID MM will be assigned shortly\n"
+                        "• No direct trades outside this system\n"
+                        "• No payments before MM verification\n"
+                        "• Failure to follow results in loss of protection"
                     ),
+                    color=0x8A2BE2
+                )
+
+            else:
+                outside_text = f"{user.mention}"
+
+                inside_embed = discord.Embed(
+                    description="Unknown ticket type.",
                     color=0x8A2BE2
                 )
 
@@ -148,12 +166,6 @@ class SecureTickets(commands.Cog):
             # SEND MESSAGES
             # ================================
             await channel.send(outside_text)
-
-            # 💜 YOUR UPDATED IMAGE ADDED HERE
-            inside_embed.set_image(
-                url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg"
-            )
-
             await channel.send(embed=inside_embed, view=CloseButtonView())
 
             await interaction.response.send_message(
