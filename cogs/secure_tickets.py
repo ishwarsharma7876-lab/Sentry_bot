@@ -125,6 +125,7 @@ class SecureTickets(commands.Cog):
                         "**Please describe your issue in detail.**\n"
                         "A staff member will assist you shortly."
                     ),
+                    embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg?ex=69ec45c6&is=69eaf446&hm=49dae0c8c575e7d0669c4cd1339158343990e80e347bf9b7719bc17d109a8d98"),
                     color=0x8A2BE2
                 )
 
@@ -142,6 +143,7 @@ class SecureTickets(commands.Cog):
                         "**Please wait for a VOID MM to respond.**\n"
                         "A staff member will assist you shortly."
                     ),
+                    embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg?ex=69ec45c6&is=69eaf446&hm=49dae0c8c575e7d0669c4cd1339158343990e80e347bf9b7719bc17d109a8d98"),
                     color=0x8A2BE2
                 )
 
