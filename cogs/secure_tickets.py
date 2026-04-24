@@ -14,9 +14,9 @@ class TicketSelect(Select):
         self.cog = cog
 
         options = [
-            SelectOption(label="VOID Authorized MM", value="mm", emoji="<:voidspace:1461678340883873852>"),
+            SelectOption(label="Report a Scam", value="scam", emoji="<:scam:1496923057384587275>"),
             SelectOption(label="General Support", value="support", emoji="<:support:1496922968989892668>"),
-            SelectOption(label="Report a Scam", value="scam", emoji="<:scam:1496923057384587275>")
+            SelectOption(label="VOID Authorized MM", value="mm", emoji="<:voidspace:1461678340883873852>")
         ]
 
         super().__init__(
@@ -84,13 +84,12 @@ class SecureTickets(commands.Cog):
         self.bot = bot
 
     # ================================
-    # CREATE TICKET (FIXED)
+    # CREATE TICKET (UPDATED GREET SYSTEM)
     # ================================
     async def create_ticket(self, interaction: Interaction):
         try:
             guild = interaction.guild
             user = interaction.user
-
             reason = interaction.data.get("values", ["unknown"])[0]
 
             category = guild.get_channel(CATEGORY_ID)
@@ -113,32 +112,61 @@ class SecureTickets(commands.Cog):
                 topic=f"UserID:{user.id} | Reason:{reason}"
             )
 
-            # 💜 PURPLE EMBED
-            embed = discord.Embed(
-                title="VOID SUPPORT — TICKET OPENED",
-                description=(
+            # ================================
+            # SCAM / SUPPORT GREET MESSAGE
+            # ================================
+            if reason in ["scam", "support"]:
+
+                outside_text = (
                     f"{user.mention}, thank you for opening a ticket!\n\n"
                     "**Please describe your issue in detail.**\n"
-                    "A staff member will assist you shortly.\n\n"
-                    "Please clearly provide:\n\n"
-                    "• <:Builder:1488534056554598452>  `Buyer & Seller usernames`\n"
-                    "• <:coc:1462053918740844709>  `(Acc/Clan) trade`\n"
-                    "• <:cashapp:1493301256830189729>  `Agreed price (exact amount)`\n"
-                    "• 💳  `Payment method`\n"
-                    "• 📎  `Screenshots/images of the deal`\n\n"
-                    "<a:arrowp:1462066642778329171> NEXT STEP\n\n"
-                    "• A VOID MM will be assigned shortly\n"
-                    "• No direct trades outside this system\n"
-                    "• No payments before MM verification\n"
-                    "• Failure to follow results in loss of protection"
-                ),
-                color=0x8A2BE2
-            )
+                    "A staff member will assist you shortly."
+                )
 
-            embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
-            embed.set_footer(text="VOID SPACE • Secure System")
+                inside_embed = discord.Embed(
+                    title="VOID SUPPORT — TICKET OPENED",
+                    description=(
+                        f"{user.mention}, thank you for opening a ticket!\n\n"
+                        "Please clearly provide:\n\n"
+                        "• <:Builder:1488534056554598452>  `Buyer & Seller usernames`\n"
+                        "• <:coc:1462053918740844709>  `(Acc/Clan) trade`\n"
+                        "• <:cashapp:1493301256830189729>  `Agreed price (exact amount)`\n"
+                        "• 💳  `Payment method`\n"
+                        "• 📎  `Screenshots/images of the deal`\n\n"
+                        "<a:arrowp:1462066642778329171> NEXT STEP\n\n"
+                        "• A VOID MM will be assigned shortly\n"
+                        "• No direct trades outside this system\n"
+                        "• No payments before MM verification\n"
+                        "• Failure to follow results in loss of protection"
+                    ),
+                    color=0x8A2BE2
+                )
 
-            await channel.send(embed=embed, view=CloseButtonView())
+            # ================================
+            # MM (UNCHANGED STYLE)
+            # ================================
+            else:
+
+                outside_text = (
+                    f"{user.mention}, thank you for opening a ticket!\n\n"
+                    "**Please describe your issue in detail.**\n"
+                    "A staff member will assist you shortly."
+                )
+
+                inside_embed = discord.Embed(
+                    title="VOID SUPPORT — MM REQUEST",
+                    description=(
+                        f"{user.mention}, thank you for opening a ticket!\n\n"
+                        "**Please wait for a VOID MM to respond.**"
+                    ),
+                    color=0x8A2BE2
+                )
+
+            # ================================
+            # SEND MESSAGES
+            # ================================
+            await channel.send(outside_text)
+            await channel.send(embed=inside_embed, view=CloseButtonView())
 
             await interaction.response.send_message(
                 f"✅ Ticket created → {channel.mention}",
@@ -150,6 +178,7 @@ class SecureTickets(commands.Cog):
                 f"❌ Error: {str(e)}",
                 ephemeral=True
             )
+
 
     # ================================
     # PANEL COMMAND
@@ -173,7 +202,7 @@ class SecureTickets(commands.Cog):
 
 
     # ================================
-    # +cl COMMAND
+    # CLOSE COMMAND
     # ================================
     @commands.command()
     async def cl(self, ctx):
