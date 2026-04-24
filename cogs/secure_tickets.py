@@ -39,7 +39,7 @@ class SecurePanelView(View):
 
 
 # ================================
-# CLOSE CONFIRMATION
+# CLOSE CONFIRM VIEW
 # ================================
 class ConfirmCloseView(View):
     def __init__(self):
@@ -84,7 +84,7 @@ class SecureTickets(commands.Cog):
         self.bot = bot
 
     # ================================
-    # CREATE TICKET (UPDATED GREET SYSTEM)
+    # CREATE TICKET LOGIC
     # ================================
     async def create_ticket(self, interaction: Interaction):
         try:
@@ -113,51 +113,34 @@ class SecureTickets(commands.Cog):
             )
 
             # ================================
-            # SCAM / SUPPORT GREET MESSAGE
+            # SCAM + SUPPORT (SIMPLE EMBED)
             # ================================
             if reason in ["scam", "support"]:
 
-                outside_text = (
-                    f"{user.mention}, thank you for opening a ticket!\n\n"
-                    "**Please describe your issue in detail.**\n"
-                    "A staff member will assist you shortly."
-                )
+                outside_text = f"{user.mention}"
 
                 inside_embed = discord.Embed(
-                    title="VOID SUPPORT — TICKET OPENED",
                     description=(
                         f"{user.mention}, thank you for opening a ticket!\n\n"
-                        "Please clearly provide:\n\n"
-                        "• <:Builder:1488534056554598452>  `Buyer & Seller usernames`\n"
-                        "• <:coc:1462053918740844709>  `(Acc/Clan) trade`\n"
-                        "• <:cashapp:1493301256830189729>  `Agreed price (exact amount)`\n"
-                        "• 💳  `Payment method`\n"
-                        "• 📎  `Screenshots/images of the deal`\n\n"
-                        "<a:arrowp:1462066642778329171> NEXT STEP\n\n"
-                        "• A VOID MM will be assigned shortly\n"
-                        "• No direct trades outside this system\n"
-                        "• No payments before MM verification\n"
-                        "• Failure to follow results in loss of protection"
+                        "**Please describe your issue in detail.**\n"
+                        "A staff member will assist you shortly."
                     ),
                     color=0x8A2BE2
                 )
 
             # ================================
-            # MM (UNCHANGED STYLE)
+            # MM TICKETS (FULL FORMAT)
             # ================================
             else:
 
-                outside_text = (
-                    f"{user.mention}, thank you for opening a ticket!\n\n"
-                    "**Please describe your issue in detail.**\n"
-                    "A staff member will assist you shortly."
-                )
+                outside_text = f"{user.mention}, thank you for opening a ticket!"
 
                 inside_embed = discord.Embed(
                     title="VOID SUPPORT — MM REQUEST",
                     description=(
                         f"{user.mention}, thank you for opening a ticket!\n\n"
-                        "**Please wait for a VOID MM to respond.**"
+                        "**Please wait for a VOID MM to respond.**\n"
+                        "A staff member will assist you shortly."
                     ),
                     color=0x8A2BE2
                 )
