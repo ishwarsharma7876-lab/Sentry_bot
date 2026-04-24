@@ -6,11 +6,11 @@ from discord import SelectOption, Interaction
 CATEGORY_ID = 1461296075376689279
 
 # ================================
-# PANEL VIEW (DROPDOWN)
+# SELECT MENU (FIXED)
 # ================================
-class SecurePanelView(View):
-    def __init__(self):
-        super().__init__(timeout=None)
+class TicketSelect(Select):
+    def __init__(self, cog):
+        self.cog = cog
 
         options = [
             SelectOption(label="Report a Scam", value="scam", emoji="<:scam:1496923057384587275>"),
@@ -18,21 +18,47 @@ class SecurePanelView(View):
             SelectOption(label="VOID Authorized MM", value="mm", emoji="<:voidspace:1461678340883873852>")
         ]
 
-        select = Select(
+        super().__init__(
             placeholder="Select ticket reason",
             options=options,
             custom_id="secure_ticket_select_v2"
         )
 
-        select.callback = self.create_ticket
-        self.add_item(select)
+    async def callback(self, interaction: Interaction):
+        await self.cog.create_ticket(interaction)
 
+
+# ================================
+# PANEL VIEW
+# ================================
+class SecurePanelView(View):
+    def __init__(self, cog):
+        super().__init__(timeout=None)
+        self.add_item(TicketSelect(cog))
+
+
+# ================================
+# MAIN COG
+# ================================
+class SecureTickets(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    # ================================
+    # CREATE TICKET FUNCTION
+    # ================================
     async def create_ticket(self, interaction: Interaction):
         guild = interaction.guild
         user = interaction.user
         reason = interaction.data["values"][0]
 
         category = guild.get_channel(CATEGORY_ID)
+
+        if category is None:
+            return await interaction.response.send_message(
+                "❌ Ticket category not found.",
+                ephemeral=True
+            )
 
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
@@ -46,9 +72,6 @@ class SecurePanelView(View):
             topic=f"UserID:{user.id} | Reason:{reason}"
         )
 
-        # ================================
-        # GREET EMBED
-        # ================================
         embed = discord.Embed(
             title="VOID SUPPORT — TICKET OPENED",
             description=(
@@ -67,7 +90,7 @@ class SecurePanelView(View):
                 "• No payments before MM verification\n"
                 "• Failure to follow results in loss of protection"
             ),
-            color=6c3baa
+            color=0xFF4FD8
         )
 
         embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
@@ -80,19 +103,27 @@ class SecurePanelView(View):
             ephemeral=True
         )
 
+
 # ================================
-# CLOSE BUTTON
+# CLOSE BUTTON VIEW
 # ================================
 class CloseButtonView(View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, emoji="🔒", custom_id="secure_close_ticket_btn")
+    @discord.ui.button(
+        label="Close Ticket",
+        style=discord.ButtonStyle.red,
+        emoji="🔒",
+        custom_id="secure_close_ticket_btn"
+    )
     async def close_ticket(self, interaction: Interaction, button: Button):
         await interaction.response.send_message(
             "Are you sure you want to close this ticket?",
-            view=ConfirmCloseView()
+            view=ConfirmCloseView(),
+            ephemeral=True
         )
+
 
 # ================================
 # CONFIRM CLOSE VIEW
@@ -110,8 +141,9 @@ class ConfirmCloseView(View):
     async def no(self, interaction: Interaction, button: Button):
         await interaction.response.send_message("Cancelled.", ephemeral=True)
 
+
 # ================================
-# COG
+# COMMANDS
 # ================================
 class SecureTickets(commands.Cog):
     def __init__(self, bot):
@@ -126,17 +158,15 @@ class SecureTickets(commands.Cog):
                 "• Follow instructions after ticket creation\n"
                 "• All secure trades must begin here."
             ),
-            color=6c3baa
+            color=0xFF4FD8
         )
 
         embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
         embed.set_footer(text="VOID SPACE • Secure System")
 
-        await ctx.send(embed=embed, view=SecurePanelView())
+        await ctx.send(embed=embed, view=SecurePanelView(self))
 
-    # ================================
-    # +cl COMMAND
-    # ================================
+
     @commands.command()
     async def cl(self, ctx):
         if "ticket-" not in ctx.channel.name:
@@ -146,6 +176,7 @@ class SecureTickets(commands.Cog):
             "Are you sure you want to close this ticket?",
             view=ConfirmCloseView()
         )
+
 
 # ================================
 # SETUP
