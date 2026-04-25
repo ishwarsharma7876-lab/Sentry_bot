@@ -10,22 +10,26 @@ class Say(commands.Cog):
     async def say(self, ctx, channel: discord.TextChannel, *, message: str = None):
         """
         Usage:
-        +say #channel Your message
-        +say #channel Your message + attach image
+        +say #channel message
+        + attach multiple files (images/docs/etc)
         """
 
         try:
-            # Check for attachment (image/file)
+            files = []
+
+            # Collect ALL attachments (multiple supported)
             if ctx.message.attachments:
-                attachment = ctx.message.attachments[0]
-                file = await attachment.to_file()
+                for attachment in ctx.message.attachments:
+                    file = await attachment.to_file()
+                    files.append(file)
 
-                await channel.send(content=message or None, file=file)
-            else:
-                # Only message
-                await channel.send(message)
+            # Send message + files (or only files / only message)
+            await channel.send(
+                content=message if message else None,
+                files=files if files else None
+            )
 
-            await ctx.send(f"✅ Message sent to {channel.mention}", delete_after=6)
+            await ctx.send(f"✅ Sent to {channel.mention}", delete_after=5)
 
             try:
                 await ctx.message.delete()
@@ -33,10 +37,9 @@ class Say(commands.Cog):
                 pass
 
         except discord.Forbidden:
-            await ctx.send("❌ I don't have permission to send messages in that channel.")
+            await ctx.send("❌ No permission in that channel.")
         except Exception as e:
-            await ctx.send(f"❌ Failed to send: {e}")
-
+            await ctx.send(f"❌ Error: {e}")
 
 async def setup(bot):
     await bot.add_cog(Say(bot))
