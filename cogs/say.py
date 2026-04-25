@@ -12,32 +12,18 @@ class Say(commands.Cog):
         Usage:
         +say #channel Your message
         +say #channel Your message + attach image
-        +say #channel Your message https://image-link.com/img.png
         """
 
         try:
-            file = None
-            embed = None
-
-            # Check if user attached a file
+            # Check for attachment (image/file)
             if ctx.message.attachments:
                 attachment = ctx.message.attachments[0]
                 file = await attachment.to_file()
 
-                embed = discord.Embed(description=message or "", color=0x71368A)
-                embed.set_image(url=f"attachment://{file.filename}")
-
-                await channel.send(embed=embed, file=file)
-
+                await channel.send(content=message or None, file=file)
             else:
-                # Check if message contains image URL
-                if message and ("http://" in message or "https://" in message):
-                    embed = discord.Embed(description=message, color=0x71368A)
-                    embed.set_image(url=message.split()[-1])  # last word as URL
-                    await channel.send(embed=embed)
-                else:
-                    # Normal message
-                    await channel.send(message)
+                # Only message
+                await channel.send(message)
 
             await ctx.send(f"✅ Message sent to {channel.mention}", delete_after=6)
 
