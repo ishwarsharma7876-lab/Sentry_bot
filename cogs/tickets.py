@@ -8,7 +8,7 @@ import os
 
 CONFIG_PATH = "/app/data/ticket_config.json"
 TRANSCRIPT_CHANNEL_ID = 1461842853209833655
-SHOWCASE_MANAGER_ID = 1188455104957906987   # ← Your special user ID
+SHOWCASE_MANAGER_ID = 1188455104957906987   # Special staff for Showcase Bases
 
 def load_ticket_config():
     if os.path.exists(CONFIG_PATH):
@@ -44,7 +44,7 @@ class PersistentTicketView(View):
             min_values=1,
             max_values=1,
             options=options,
-            custom_id="void_ticket_select_v7"
+            custom_id="void_ticket_select_v8"
         )
         select.callback = self.create_ticket
         self.add_item(select)
@@ -63,25 +63,27 @@ class PersistentTicketView(View):
         ticket_number = len(existing) + 1
         ticket_name = f"ticket-{ticket_number:05d}"
 
-        # Default overwrites
+        # Base overwrites
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
             user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True, read_message_history=True),
             guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True, manage_channels=True),
         }
 
-        # Special case: If it's a Showcase Bases ticket, give access to the specific user
+        # Special permissions for Showcase Bases tickets
         if value == "showcase_bases":
             showcase_manager = guild.get_member(SHOWCASE_MANAGER_ID)
             if showcase_manager:
                 overwrites[showcase_manager] = discord.PermissionOverwrite(
-                    view_channel=True, 
-                    send_messages=True, 
-                    read_messages=True, 
-                    read_message_history=True
+                    view_channel=True,
+                    send_messages=True,
+                    read_messages=True,
+                    read_message_history=True,
+                    manage_messages=True,      # Allow deleting messages if needed
+                    manage_channels=True       # Allow closing ticket using +close
                 )
 
-        # Create the channel
+        # Create channel
         if category_id:
             category = guild.get_channel(category_id)
             if isinstance(category, discord.CategoryChannel):
@@ -111,9 +113,7 @@ class PersistentTicketView(View):
         await interaction.response.send_message(f"✅ Ticket created → {channel.mention}", ephemeral=True)
 
 
-# ================================================
-#  Close Ticket System (Unchanged)
-# ================================================
+# Close Ticket System (Unchanged - but now manager can also use +close)
 class CloseTicketView(View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -212,8 +212,9 @@ class Tickets(commands.Cog):
 
         is_staff = ctx.author.guild_permissions.manage_channels
         is_creator = ctx.author.mention in (ctx.channel.topic or "")
+        is_showcase_manager = ctx.author.id == SHOWCASE_MANAGER_ID
 
-        if not (is_staff or is_creator):
+        if not (is_staff or is_creator or is_showcase_manager):
             return await ctx.send("❌ Only the ticket creator or staff can close this ticket.", delete_after=8)
 
         confirm_view = ConfirmCloseView(ctx.channel)
