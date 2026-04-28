@@ -32,7 +32,8 @@ class PersistentTicketView(View):
             SelectOption(label="Buy Accounts / Enquiries",        value="buy_accounts", emoji="<:coc:1462053918740844709>"),
             SelectOption(label="Walls Maxing / Farming",          value="walls_farming", emoji="<:walls:1462055575717150974>"),
             SelectOption(label="Capital Raids / Capital Golds",   value="capital_raids", emoji="<:clancapital:1461849162248224788>"),
-            SelectOption(label="Showcase Bases",                  value="showcase_bases", emoji="<:Builder:1488534056554598452>"),   # ← New Option
+            SelectOption(label="Showcase Bases",                  value="showcase_bases", emoji="<:Builder:1488534056554598452>"),
+            SelectOption(label="CWL Base Packs",                  value="showcase_bases", emoji="<:cyberqueen:1461710904885514354>"),# ← New Option
             SelectOption(label="Gold / Event Pass Purchase",      value="gold_purchase", emoji="<:goldpass:1461847049250275570>"),
             SelectOption(label="Raffle Tickets",                  value="raffle", emoji="<:vticket:1472623749089071315>"),
         ]
