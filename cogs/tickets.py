@@ -22,20 +22,20 @@ def save_ticket_config(data):
 
 
 # ================================================
-#  Ticket Creation Panel (Updated with Showcase Bases)
+#  Ticket Creation Panel
 # ================================================
 class PersistentTicketView(View):
     def __init__(self):
         super().__init__(timeout=None)
 
         options = [
-            SelectOption(label="Buy Accounts / Enquiries",        value="buy_accounts", emoji="<:coc:1462053918740844709>"),
-            SelectOption(label="Walls Maxing / Farming",          value="walls_farming", emoji="<:walls:1462055575717150974>"),
-            SelectOption(label="Capital Raids / Capital Golds",   value="capital_raids", emoji="<:clancapital:1461849162248224788>"),
-            SelectOption(label="Showcase Bases",                  value="showcase_bases", emoji="<:Builder:1488534056554598452>"),
-            SelectOption(label="CWL Base Packs",                  value="showcase_bases", emoji="<:cyberqueen:1461710904885514354>"),# ← New Option
-            SelectOption(label="Gold / Event Pass Purchase",      value="gold_purchase", emoji="<:goldpass:1461847049250275570>"),
-            SelectOption(label="Raffle Tickets",                  value="raffle", emoji="<:vticket:1472623749089071315>"),
+            SelectOption(label="Buy Accounts / Enquiries",        value="buy_accounts",       emoji="<:coc:1462053918740844709>"),
+            SelectOption(label="Walls Maxing / Farming",          value="walls_farming",      emoji="<:walls:1462055575717150974>"),
+            SelectOption(label="Capital Raids / Capital Golds",   value="capital_raids",      emoji="<:clancapital:1461849162248224788>"),
+            SelectOption(label="Showcase Bases",                  value="showcase_bases",     emoji="<:Builder:1488534056554598452>"),
+            SelectOption(label="CWL Base Packs",                  value="cwl_base_packs",     emoji="<:cyberqueen:1461710904885514354>"),  # Fixed value
+            SelectOption(label="Gold / Event Pass Purchase",      value="gold_purchase",      emoji="<:goldpass:1461847049250275570>"),
+            SelectOption(label="Raffle Tickets",                  value="raffle",             emoji="<:vticket:1472623749089071315>"),
         ]
 
         select = Select(
@@ -43,13 +43,14 @@ class PersistentTicketView(View):
             min_values=1,
             max_values=1,
             options=options,
-            custom_id="void_ticket_select_v5"
+            custom_id="void_ticket_select_v6"
         )
         select.callback = self.create_ticket
         self.add_item(select)
 
     async def create_ticket(self, interaction: Interaction):
         value = interaction.data["values"][0]
+        label = next((opt.label for opt in self.children[0].options if opt.value == value), value)
 
         guild = interaction.guild
         user = interaction.user
@@ -70,14 +71,18 @@ class PersistentTicketView(View):
         if category_id:
             category = guild.get_channel(category_id)
             if isinstance(category, discord.CategoryChannel):
-                channel = await category.create_text_channel(name=ticket_name, topic=f"Ticket: {value.replace('_', ' ').title()} | Opened by {user}", overwrites=overwrites)
+                channel = await category.create_text_channel(
+                    name=ticket_name, 
+                    topic=f"Ticket: {label} | Opened by {user}", 
+                    overwrites=overwrites
+                )
             else:
                 channel = await guild.create_text_channel(name=ticket_name, topic=..., overwrites=overwrites)
         else:
             channel = await guild.create_text_channel(name=ticket_name, topic=..., overwrites=overwrites)
 
         embed = discord.Embed(
-            title=f"✦ VOID SUPPORT TERMINAL ✦ – {value.replace('_', ' ').title()}",
+            title=f"✦ VOID SUPPORT TERMINAL ✦ – {label}",
             description=f"{user.mention}, thank you for opening a ticket!\n\n**Please describe your issue in detail.**\nA staff member will assist you shortly.",
             color=0x71368A
         )
@@ -86,7 +91,6 @@ class PersistentTicketView(View):
 
         await channel.send(embed=embed, content=user.mention)
 
-        # Close button
         close_view = CloseTicketView()
         await channel.send("**Click below to close this ticket**", view=close_view)
 
