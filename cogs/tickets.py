@@ -8,6 +8,7 @@ import os
 
 CONFIG_PATH = "/app/data/ticket_config.json"
 TRANSCRIPT_CHANNEL_ID = 1461842853209833655
+SHOWCASE_MANAGER_ID = 1188455104957906987   # ← Your special user ID
 
 def load_ticket_config():
     if os.path.exists(CONFIG_PATH):
@@ -33,7 +34,7 @@ class PersistentTicketView(View):
             SelectOption(label="Walls Maxing / Farming",          value="walls_farming",      emoji="<:walls:1462055575717150974>"),
             SelectOption(label="Capital Raids / Capital Golds",   value="capital_raids",      emoji="<:clancapital:1461849162248224788>"),
             SelectOption(label="Showcase Bases",                  value="showcase_bases",     emoji="<:Builder:1488534056554598452>"),
-            SelectOption(label="CWL Base Packs",                  value="cwl_base_packs",     emoji="<:cyberqueen:1461710904885514354>"),  # Fixed value
+            SelectOption(label="CWL Base Packs",                  value="cwl_base_packs",     emoji="<:cyberqueen:1461710904885514354>"),
             SelectOption(label="Gold / Event Pass Purchase",      value="gold_purchase",      emoji="<:goldpass:1461847049250275570>"),
             SelectOption(label="Raffle Tickets",                  value="raffle",             emoji="<:vticket:1472623749089071315>"),
         ]
@@ -43,7 +44,7 @@ class PersistentTicketView(View):
             min_values=1,
             max_values=1,
             options=options,
-            custom_id="void_ticket_select_v6"
+            custom_id="void_ticket_select_v7"
         )
         select.callback = self.create_ticket
         self.add_item(select)
@@ -62,12 +63,25 @@ class PersistentTicketView(View):
         ticket_number = len(existing) + 1
         ticket_name = f"ticket-{ticket_number:05d}"
 
+        # Default overwrites
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
             user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True, read_message_history=True),
             guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True, manage_channels=True),
         }
 
+        # Special case: If it's a Showcase Bases ticket, give access to the specific user
+        if value == "showcase_bases":
+            showcase_manager = guild.get_member(SHOWCASE_MANAGER_ID)
+            if showcase_manager:
+                overwrites[showcase_manager] = discord.PermissionOverwrite(
+                    view_channel=True, 
+                    send_messages=True, 
+                    read_messages=True, 
+                    read_message_history=True
+                )
+
+        # Create the channel
         if category_id:
             category = guild.get_channel(category_id)
             if isinstance(category, discord.CategoryChannel):
