@@ -1,3 +1,4 @@
+# cogs/tickets.py
 import discord
 from discord.ext import commands
 from discord.ui import View, Select, Button
@@ -7,7 +8,6 @@ import os
 
 CONFIG_PATH = "/app/data/ticket_config.json"
 TRANSCRIPT_CHANNEL_ID = 1461842853209833655
-
 
 def load_ticket_config():
     if os.path.exists(CONFIG_PATH):
@@ -20,8 +20,9 @@ def save_ticket_config(data):
     with open(CONFIG_PATH, "w") as f:
         json.dump(data, f, indent=2)
 
+
 # ================================================
-# Ticket Creation Panel
+#  Ticket Creation Panel (Updated with Showcase Bases)
 # ================================================
 class PersistentTicketView(View):
     def __init__(self):
@@ -31,7 +32,7 @@ class PersistentTicketView(View):
             SelectOption(label="Buy Accounts / Enquiries",        value="buy_accounts", emoji="<:coc:1462053918740844709>"),
             SelectOption(label="Walls Maxing / Farming",          value="walls_farming", emoji="<:walls:1462055575717150974>"),
             SelectOption(label="Capital Raids / Capital Golds",   value="capital_raids", emoji="<:clancapital:1461849162248224788>"),
-            SelectOption(label="Showcase / CWL Base",             value="custom_base", emoji="<:builder:1462058517904101510>"),
+            SelectOption(label="Showcase Bases",                  value="showcase_bases", emoji="<:Builder:1488534056554598452>"),   # ← New Option
             SelectOption(label="Gold / Event Pass Purchase",      value="gold_purchase", emoji="<:goldpass:1461847049250275570>"),
             SelectOption(label="Raffle Tickets",                  value="raffle", emoji="<:vticket:1472623749089071315>"),
         ]
@@ -61,49 +62,38 @@ class PersistentTicketView(View):
 
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(view_channel=False),
-            user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True),
-            guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True, manage_channels=True),
+            user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True, read_message_history=True),
+            guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True, manage_channels=True),
         }
-
-        topic = f"Ticket: {value.replace('_',' ').title()} | UserID:{user.id}"
 
         if category_id:
             category = guild.get_channel(category_id)
             if isinstance(category, discord.CategoryChannel):
-                channel = await category.create_text_channel(name=ticket_name, topic=topic, overwrites=overwrites)
+                channel = await category.create_text_channel(name=ticket_name, topic=f"Ticket: {value.replace('_', ' ').title()} | Opened by {user}", overwrites=overwrites)
             else:
-                channel = await guild.create_text_channel(name=ticket_name, topic=topic, overwrites=overwrites)
+                channel = await guild.create_text_channel(name=ticket_name, topic=..., overwrites=overwrites)
         else:
-            channel = await guild.create_text_channel(name=ticket_name, topic=topic, overwrites=overwrites)
+            channel = await guild.create_text_channel(name=ticket_name, topic=..., overwrites=overwrites)
 
-        # ✅ UPDATED MESSAGE (ONLY CHANGE)
         embed = discord.Embed(
-            title="VOID Support Terminal",
-            description=(
-                "Meanwhile tell us what you’re here for:\n"
-                "• Account Purchase\n"
-                "• Gold or Event Pass Purchase\n"
-                "• COC Services (farming, raids, bases, etc.)\n"
-                "• Raffle Tickets\n\n"
-                "The VOID Team will be with you shortly."
-            ),
+            title=f"✦ VOID SUPPORT TERMINAL ✦ – {value.replace('_', ' ').title()}",
+            description=f"{user.mention}, thank you for opening a ticket!\n\n**Please describe your issue in detail.**\nA staff member will assist you shortly.",
             color=0x71368A
         )
         embed.set_footer(text="VOID SPACE • Official Ticket System")
         embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
 
-        await channel.send(
-            content=f"Hey {user.mention}!  You've entered a safe space!  Kindly wait, <@223110396871966728> / <@645693323104878623> will assist you soon!",
-            embed=embed
-        )
+        await channel.send(embed=embed, content=user.mention)
 
+        # Close button
         close_view = CloseTicketView()
         await channel.send("**Click below to close this ticket**", view=close_view)
 
         await interaction.response.send_message(f"✅ Ticket created → {channel.mention}", ephemeral=True)
 
+
 # ================================================
-# Close Ticket Button
+#  Close Ticket System (Unchanged)
 # ================================================
 class CloseTicketView(View):
     def __init__(self):
@@ -112,18 +102,14 @@ class CloseTicketView(View):
     @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, emoji="🔒")
     async def ask_close(self, interaction: Interaction, button: Button):
         confirm_view = ConfirmCloseView(interaction.channel)
-
         embed = discord.Embed(
             title="Are you sure you want to close this ticket?",
             description="This ticket will be completely removed after closing.",
             color=0x71368A
         )
+        await interaction.response.send_message(embed=embed, view=confirm_view, ephemeral=False)
 
-        await interaction.response.send_message(embed=embed, view=confirm_view)
 
-# ================================================
-# Confirm Close
-# ================================================
 class ConfirmCloseView(View):
     def __init__(self, channel: discord.TextChannel):
         super().__init__(timeout=180)
@@ -132,11 +118,13 @@ class ConfirmCloseView(View):
     @discord.ui.button(label="Send Transcript", style=discord.ButtonStyle.blurple, emoji="📜")
     async def send_transcript(self, interaction: Interaction, button: Button):
         if not interaction.user.guild_permissions.manage_channels:
-            return await interaction.response.send_message("❌ Only staff can send transcripts.", ephemeral=True)
+            await interaction.response.send_message("❌ Only staff can send transcripts.", ephemeral=True)
+            return
 
         transcript_channel = interaction.guild.get_channel(TRANSCRIPT_CHANNEL_ID)
         if not transcript_channel:
-            return await interaction.response.send_message("❌ Transcript channel not found.", ephemeral=True)
+            await interaction.response.send_message("❌ Transcript channel not found.", ephemeral=True)
+            return
 
         messages = []
         async for msg in self.channel.history(limit=100):
@@ -146,7 +134,8 @@ class ConfirmCloseView(View):
         transcript_text = "\n".join(reversed(messages))
 
         await transcript_channel.send(
-            f"**Transcript for {self.channel.name}**\nClosed by {interaction.user.mention}\n\n```{transcript_text}```"
+            f"**Transcript for {self.channel.name}**\nClosed by {interaction.user.mention}\n\n"
+            f"```{transcript_text}```"
         )
 
         await interaction.response.send_message("📜 Transcript sent!", ephemeral=True)
@@ -154,21 +143,25 @@ class ConfirmCloseView(View):
     @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.red, emoji="❌")
     async def yes_close(self, interaction: Interaction, button: Button):
         await interaction.response.defer()
-        await self.channel.delete(reason=f"Closed by {interaction.user}")
+        try:
+            await self.channel.delete(reason=f"Ticket closed by {interaction.user}")
+        except Exception as e:
+            await interaction.followup.send(f"Failed to close: {e}", ephemeral=True)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.green, emoji="✅")
     async def cancel(self, interaction: Interaction, button: Button):
-        await interaction.response.send_message("Cancelled.", ephemeral=True)
+        await interaction.response.send_message("Cancelled.", ephemeral=True, delete_after=10)
         self.stop()
 
+
 # ================================================
-# Commands
+#  Commands
 # ================================================
 class Tickets(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(name="ticketpanel")
     @commands.has_permissions(administrator=True)
     async def ticketpanel(self, ctx):
         embed = discord.Embed(
@@ -179,40 +172,39 @@ class Tickets(commands.Cog):
         embed.set_footer(text="VOID SPACE OFFICIAL TICKET TOOL")
         embed.set_image(url="https://cdn.discordapp.com/attachments/1461984553953657004/1472633716307263628/Add_a_heading.jpg")
 
-        await ctx.send(embed=embed, view=PersistentTicketView())
+        view = PersistentTicketView()
+        await ctx.send(embed=embed, view=view)
 
-    @commands.command()
+    @commands.command(name="setticketcategory")
     @commands.has_permissions(administrator=True)
     async def setticketcategory(self, ctx, category: discord.CategoryChannel):
         config = load_ticket_config()
-        gid = str(ctx.guild.id)
-
-        if gid not in config:
-            config[gid] = {}
-
-        config[gid]["ticket_category_id"] = category.id
+        guild_id = str(ctx.guild.id)
+        if guild_id not in config:
+            config[guild_id] = {}
+        config[guild_id]["ticket_category_id"] = category.id
         save_ticket_config(config)
+        await ctx.send(f"✅ New tickets will now be created in category: **{category.name}**")
 
-        await ctx.send(f"✅ Tickets will now be created in: **{category.name}**")
-
-    @commands.command()
+    @commands.command(name="close")
     async def close(self, ctx):
-        if "ticket-" not in ctx.channel.name:
-            return await ctx.send("❌ Use this inside a ticket.", delete_after=8)
+        if not ctx.channel.name.startswith("ticket-"):
+            return await ctx.send("❌ This command can only be used inside a ticket channel.", delete_after=10)
 
         is_staff = ctx.author.guild_permissions.manage_channels
-        is_creator = str(ctx.author.id) in (ctx.channel.topic or "")
+        is_creator = ctx.author.mention in (ctx.channel.topic or "")
 
         if not (is_staff or is_creator):
-            return await ctx.send("❌ Only creator or staff can close.", delete_after=8)
+            return await ctx.send("❌ Only the ticket creator or staff can close this ticket.", delete_after=8)
 
+        confirm_view = ConfirmCloseView(ctx.channel)
         embed = discord.Embed(
             title="Are you sure you want to close this ticket?",
-            description="This ticket will be deleted.",
+            description="This ticket will be completely removed after closing.",
             color=0x71368A
         )
+        await ctx.send(embed=embed, view=confirm_view)
 
-        await ctx.send(embed=embed, view=ConfirmCloseView(ctx.channel))
 
 async def setup(bot):
     await bot.add_cog(Tickets(bot))
