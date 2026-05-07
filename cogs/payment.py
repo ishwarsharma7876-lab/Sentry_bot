@@ -4,7 +4,7 @@ from discord.ui import View, Button, Modal, TextInput
 import json
 import os
 
-CONFIG_PATH = "/app/data/payment_methods.json"
+CONFIG_PATH = "./data/payment_methods.json"
 
 
 # ---------------- CONFIG ---------------- #
