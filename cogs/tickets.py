@@ -6,7 +6,7 @@ from discord import SelectOption, Interaction
 import json
 import os
 
-CONFIG_PATH = "/app/data/ticket_config.json"
+CONFIG_PATH = "./data/ticket_config.json"
 TRANSCRIPT_CHANNEL_ID = 1461842853209833655
 SHOWCASE_MANAGER_ID = 1188455104957906987   # Special staff for Showcase Bases
 
